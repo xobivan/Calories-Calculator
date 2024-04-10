@@ -7,7 +7,7 @@ class CalorieCounterApp(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("Calorie Counter")
+        self.setWindowTitle("Calories Counter")
         self.setGeometry(100, 100, 800, 600)
         f = open("Calories_Calculator/styles/style.qss")
         stylesheet = f.read()
