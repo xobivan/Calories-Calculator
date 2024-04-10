@@ -1,0 +1,54 @@
+@font-face {
+    font-family: "Montserrat-Regular";
+    src: url("/home/xobi_van/Projects/Calories_Calculator/assests/fonts/Montserrat-Medium.ttf");
+}s
+QMainWindow {
+    background-color: #f0f0f0;
+
+    
+}
+
+QLabel {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+QPushButton {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+QPushButton:hover {
+    background-color: #45a049;
+}
+
+QLineEdit {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+QTableWidget {
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+QTableWidget::item {
+    padding: 5px;
+}
+
+QHeaderView::section {
+    background-color: #4CAF50;
+    color: white;
+    font-size: 16px;
+}
