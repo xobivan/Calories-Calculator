@@ -100,7 +100,7 @@ class CalorieCounterApp(QMainWindow):
             row_position = self.table_widget.rowCount()
             self.table_widget.insertRow(row_position)
             self.table_widget.setItem(row_position, 0, QTableWidgetItem(name))
-            self.table_widget.setItem(row_position, 1, QTableWidgetItem(calories + " kcal"))
+            self.table_widget.setItem(row_position, 1, QTableWidgetItem(calories))
 
             self.name_input.clear()
             self.calories_input.clear()
