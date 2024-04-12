@@ -1,6 +1,12 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTableWidget, QTableWidgetItem, QAction
-from PyQt5.QtGui import QIcon, QFont, QPixmap
+import pickle
+from PyQt5.QtWidgets import (QApplication, QMainWindow, 
+                             QWidget, QVBoxLayout, 
+                             QHBoxLayout, QLabel, QLineEdit, 
+                             QPushButton, QTableWidget, 
+                             QTableWidgetItem, QAction)
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QEvent
 
 
 class CalorieCounterApp(QMainWindow):
@@ -9,14 +15,12 @@ class CalorieCounterApp(QMainWindow):
 
         self.setWindowTitle("Calories Counter")
         self.setGeometry(100, 100, 800, 600)
-        f = open("Calories_Calculator/styles/style.qss")
+
+        f = open("./styles/style.qss")
         stylesheet = f.read()
         self.setStyleSheet(stylesheet)
 
-        f.close()
-
         self.initUI()
-
 
     def initUI(self):
         self.central_widget = QWidget()
@@ -37,14 +41,15 @@ class CalorieCounterApp(QMainWindow):
         view_foods_group = self.create_view_foods_group()
         layout.addLayout(view_foods_group)
 
-        # Создаем статусную строку
+        self.load_foods()
+
         self.statusBar().showMessage('Ready')
 
     def create_menu(self):
         main_menu = self.menuBar()
         file_menu = main_menu.addMenu('File')
 
-        exit_action = QAction(QIcon('exit.png'), 'Exit', self)
+        exit_action = QAction(QIcon('./assets/pics/exit.png'), 'Exit', self)
         exit_action.setShortcut('Ctrl+Q')
         exit_action.setStatusTip('Quit the app')
         exit_action.triggered.connect(self.close)
@@ -55,7 +60,6 @@ class CalorieCounterApp(QMainWindow):
         add_food_group = QVBoxLayout()
 
         label = QLabel("Add Product")
-        # label.setFont(QFont("Arial", 16, QFont.Bold))
         add_food_group.addWidget(label)
 
         name_layout = QHBoxLayout()
@@ -77,12 +81,12 @@ class CalorieCounterApp(QMainWindow):
         add_food_group.addWidget(add_button)
 
         return add_food_group
+    
 
     def create_view_foods_group(self):
         view_foods_group = QVBoxLayout()
 
         label = QLabel("Added Products")
-        # label.setFont(QFont("Arial", 16, QFont.Bold))
         view_foods_group.addWidget(label)
 
         self.table_widget = QTableWidget()
@@ -93,6 +97,7 @@ class CalorieCounterApp(QMainWindow):
         return view_foods_group
 
     def add_food(self):
+
         name = self.name_input.text()
         calories = self.calories_input.text()
 
@@ -108,6 +113,45 @@ class CalorieCounterApp(QMainWindow):
             total_calories = sum(int(self.table_widget.item(row, 1).text()) for row in range(self.table_widget.rowCount()))
             self.statusBar().showMessage(f'Total amount of calories: {total_calories} kcal')
 
+    def delete_food(self, row):
+        self.table_widget.removeRow(row)
+        self.save_foods()
+
+    def save_foods(self):
+        foods = []
+        for row in range(self.table_widget.rowCount()):
+            name = self.table_widget.item(row, 0).text()
+            calories = int(self.table_widget.item(row, 1).text())
+            foods.append((name, calories))
+
+        with open('foods.pkl', 'wb') as f:
+            pickle.dump(foods, f)
+
+
+        # Создаем статусную строку
+        self.statusBar().showMessage('Ready')
+
+    def load_foods(self):
+        try:
+            with open('foods.pkl', 'rb') as f:
+                foods = pickle.load(f)
+
+            for name, calories in foods:
+                row_position = self.table_widget.rowCount()
+                self.table_widget.insertRow(row_position)
+                self.table_widget.setItem(row_position, 0, QTableWidgetItem(name))
+                self.table_widget.setItem(row_position, 1, QTableWidgetItem(str(calories)))
+
+                delete_button = QPushButton("Delete")
+                delete_button.clicked.connect(lambda _, row=row_position: self.delete_food(row))
+                self.table_widget.setCellWidget(row_position, 2, delete_button)
+
+        except FileNotFoundError:
+            pass
+
+    def closeEvent(self, event):
+        self.save_foods()  # Сохраняем данные перед закрытием окна
+        event.accept()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
