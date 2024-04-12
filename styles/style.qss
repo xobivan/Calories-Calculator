@@ -1,6 +1,6 @@
 @font-face {
     font-family: "Montserrat-Regular";
-    src: url("/home/xobi_van/Projects/Calories_Calculator/assests/fonts/Montserrat-Medium.ttf");
+    src: url("/home/xobi_van/Projects/Calories_Calculator/assets/fonts/Montserrat-Medium.ttf");
 }s
 QMainWindow {
     background-color: #f0f0f0;
