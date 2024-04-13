@@ -4,9 +4,10 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow,
                              QWidget, QVBoxLayout, 
                              QHBoxLayout, QLabel, QLineEdit, 
                              QPushButton, QTableWidget, 
-                             QTableWidgetItem, QAction)
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QEvent
+                             QTableWidgetItem, QAction, 
+                             QHeaderView, QMenu)
+from PyQt5.QtGui import QContextMenuEvent, QIcon
+from PyQt5.QtCore import QEvent, Qt
 
 
 class CalorieCounterApp(QMainWindow):
@@ -44,6 +45,11 @@ class CalorieCounterApp(QMainWindow):
         self.load_foods()
 
         self.statusBar().showMessage('Ready')
+
+        # Присоединяем обработчик контекстного меню к таблице
+        
+        self.table_widget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table_widget.customContextMenuRequested.connect(self.showContextMenu)
 
     def create_menu(self):
         main_menu = self.menuBar()
@@ -92,6 +98,7 @@ class CalorieCounterApp(QMainWindow):
         self.table_widget = QTableWidget()
         self.table_widget.setColumnCount(2)
         self.table_widget.setHorizontalHeaderLabels(["Name", "Calories"])
+        self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         view_foods_group.addWidget(self.table_widget)
 
         return view_foods_group
@@ -106,16 +113,11 @@ class CalorieCounterApp(QMainWindow):
             self.table_widget.insertRow(row_position)
             self.table_widget.setItem(row_position, 0, QTableWidgetItem(name))
             self.table_widget.setItem(row_position, 1, QTableWidgetItem(calories))
-
-            self.name_input.clear()
-            self.calories_input.clear()
-
             total_calories = sum(int(self.table_widget.item(row, 1).text()) for row in range(self.table_widget.rowCount()))
             self.statusBar().showMessage(f'Total amount of calories: {total_calories} kcal')
-
-    def delete_food(self, row):
-        self.table_widget.removeRow(row)
-        self.save_foods()
+        
+        self.name_input.clear()
+        self.calories_input.clear()
 
     def save_foods(self):
         foods = []
@@ -148,6 +150,18 @@ class CalorieCounterApp(QMainWindow):
 
         except FileNotFoundError:
             pass
+
+    def showContextMenu(self, pos):
+        menu = QMenu(self)
+        delete_action = QAction(QIcon('./assets/pics/delete.png'),"Delete row", self)
+        delete_action.triggered.connect(self.deleteSelectedRow)
+        delete_action.setEnabled(self.table_widget.rowCount() > 0)
+        menu.addAction(delete_action)
+        menu.exec_(self.table_widget.mapToGlobal(pos))
+
+    def deleteSelectedRow(self):
+        selected_row = self.table_widget.currentRow()
+        self.table_widget.removeRow(selected_row)
 
     def closeEvent(self, event):
         self.save_foods()  # Сохраняем данные перед закрытием окна
