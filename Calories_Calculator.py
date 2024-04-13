@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow,
                              QPushButton, QTableWidget, 
                              QTableWidgetItem, QAction, 
                              QHeaderView, QMenu)
-from PyQt5.QtGui import QContextMenuEvent, QIcon
+from PyQt5.QtGui import QContextMenuEvent, QIcon, QIntValidator
 from PyQt5.QtCore import QEvent, Qt
 
 
@@ -78,17 +78,35 @@ class CalorieCounterApp(QMainWindow):
         calories_layout = QHBoxLayout()
         calories_label = QLabel("Calories:")
         self.calories_input = QLineEdit()
+        self.calories_input.setValidator(QIntValidator())# Позволяет вводить только целые числа
         calories_layout.addWidget(calories_label)
         calories_layout.addWidget(self.calories_input)
         add_food_group.addLayout(calories_layout)
 
-        add_button = QPushButton("Add")
-        add_button.clicked.connect(self.add_food)
-        add_food_group.addWidget(add_button)
+
+        self.add_button = QPushButton("Add")
+
+        self.add_button.setEnabled(False)
+        self.add_button.setToolTip("Fill in both fields")  # Всплывающая подсказка для кнопки
+
+        self.add_button.clicked.connect(self.add_food)
+        add_food_group.addWidget(self.add_button)
+
+        # Подключаем сигналы textChanged для полей ввода
+        self.name_input.textChanged.connect(self.check_input)
+        self.calories_input.textChanged.connect(self.check_input)
 
         return add_food_group
     
 
+    def check_input(self):
+        name_valid = bool(self.name_input.text())
+        calories_valid = self.calories_input.hasAcceptableInput()
+
+        # Активируем кнопку "Добавить" только если оба поля валидны
+
+        self.add_button.setEnabled(name_valid and calories_valid)
+        
     def create_view_foods_group(self):
         view_foods_group = QVBoxLayout()
 
@@ -166,6 +184,8 @@ class CalorieCounterApp(QMainWindow):
     def closeEvent(self, event):
         self.save_foods()  # Сохраняем данные перед закрытием окна
         event.accept()
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
